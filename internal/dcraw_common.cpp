@@ -4619,37 +4619,30 @@ void CLASS lin_interpolate()
  */
 void CLASS vng_interpolate()
 {
-  struct interpolate_terms {
-    signed char y1, x1, y2, x2, weight;
-    unsigned char grads;
-  };
-  static const interpolate_terms terms[] = {
-    {-2,-2,+0,-1,0,0x01}, {-2,-2,+0,+0,1,0x01}, {-2,-1,-1,+0,0,0x01},
-    {-2,-1,+0,-1,0,0x02}, {-2,-1,+0,+0,0,0x03}, {-2,-1,+0,+1,1,0x01},
-    {-2,+0,+0,-1,0,0x06}, {-2,+0,+0,+0,1,0x02}, {-2,+0,+0,+1,0,0x03},
-    {-2,+1,-1,+0,0,0x04}, {-2,+1,+0,-1,1,0x04}, {-2,+1,+0,+0,0,0x06},
-    {-2,+1,+0,+1,0,0x02}, {-2,+2,+0,+0,1,0x04}, {-2,+2,+0,+1,0,0x04},
-    {-1,-2,-1,+0,0,0x80}, {-1,-2,+0,-1,0,0x01}, {-1,-2,+1,-1,0,0x01},
-    {-1,-2,+1,+0,1,0x01}, {-1,-1,-1,+1,0,0x88}, {-1,-1,+1,-2,0,0x40},
-    {-1,-1,+1,-1,0,0x22}, {-1,-1,+1,+0,0,0x33}, {-1,-1,+1,+1,1,0x11},
-    {-1,+0,-1,+2,0,0x08}, {-1,+0,+0,-1,0,0x44}, {-1,+0,+0,+1,0,0x11},
-    {-1,+0,+1,-2,1,0x40}, {-1,+0,+1,-1,0,0x66}, {-1,+0,+1,+0,1,0x22},
-    {-1,+0,+1,+1,0,0x33}, {-1,+0,+1,+2,1,0x10}, {-1,+1,+1,-1,1,0x44},
-    {-1,+1,+1,+0,0,0x66}, {-1,+1,+1,+1,0,0x22}, {-1,+1,+1,+2,0,0x10},
-    {-1,+2,+0,+1,0,0x04}, {-1,+2,+1,+0,1,0x04}, {-1,+2,+1,+1,0,0x04},
-    {+0,-2,+0,+0,1,0x80}, {+0,-1,+0,+1,1,0x88}, {+0,-1,+1,-2,0,0x40},
-    {+0,-1,+1,+0,0,0x11}, {+0,-1,+2,-2,0,0x40}, {+0,-1,+2,-1,0,0x20},
-    {+0,-1,+2,+0,0,0x30}, {+0,-1,+2,+1,1,0x10}, {+0,+0,+0,+2,1,0x08},
-    {+0,+0,+2,-2,1,0x40}, {+0,+0,+2,-1,0,0x60}, {+0,+0,+2,+0,1,0x20},
-    {+0,+0,+2,+1,0,0x30}, {+0,+0,+2,+2,1,0x10}, {+0,+1,+1,+0,0,0x44},
-    {+0,+1,+1,+2,0,0x10}, {+0,+1,+2,-1,1,0x40}, {+0,+1,+2,+0,0,0x60},
-    {+0,+1,+2,+1,0,0x20}, {+0,+1,+2,+2,0,0x10}, {+1,-2,+1,+0,0,0x80},
-    {+1,-1,+1,+1,0,0x88}, {+1,+0,+1,+2,0,0x08}, {+1,+0,+2,-1,0,0x40},
-    {+1,+0,+2,+1,0,0x10}
-  };
-  const interpolate_terms *cpt;
-  signed char *cp;
-  signed char chood[] = { -1,-1, -1,0, -1,+1, 0,+1, +1,+1, +1,0, +1,-1, 0,-1 };
+  static const signed char *cp, terms[] = {
+    -2,-2,+0,-1,0,0x01, -2,-2,+0,+0,1,0x01, -2,-1,-1,+0,0,0x01,
+    -2,-1,+0,-1,0,0x02, -2,-1,+0,+0,0,0x03, -2,-1,+0,+1,1,0x01,
+    -2,+0,+0,-1,0,0x06, -2,+0,+0,+0,1,0x02, -2,+0,+0,+1,0,0x03,
+    -2,+1,-1,+0,0,0x04, -2,+1,+0,-1,1,0x04, -2,+1,+0,+0,0,0x06,
+    -2,+1,+0,+1,0,0x02, -2,+2,+0,+0,1,0x04, -2,+2,+0,+1,0,0x04,
+    -1,-2,-1,+0,0,(signed char)0x80, -1,-2,+0,-1,0,0x01, -1,-2,+1,-1,0,0x01,
+    -1,-2,+1,+0,1,0x01, -1,-1,-1,+1,0,(signed char)0x88, -1,-1,+1,-2,0,0x40,
+    -1,-1,+1,-1,0,0x22, -1,-1,+1,+0,0,0x33, -1,-1,+1,+1,1,0x11,
+    -1,+0,-1,+2,0,0x08, -1,+0,+0,-1,0,0x44, -1,+0,+0,+1,0,0x11,
+    -1,+0,+1,-2,1,0x40, -1,+0,+1,-1,0,0x66, -1,+0,+1,+0,1,0x22,
+    -1,+0,+1,+1,0,0x33, -1,+0,+1,+2,1,0x10, -1,+1,+1,-1,1,0x44,
+    -1,+1,+1,+0,0,0x66, -1,+1,+1,+1,0,0x22, -1,+1,+1,+2,0,0x10,
+    -1,+2,+0,+1,0,0x04, -1,+2,+1,+0,1,0x04, -1,+2,+1,+1,0,0x04,
+    +0,-2,+0,+0,1,(signed char)0x80, +0,-1,+0,+1,1,(signed char)0x88, +0,-1,+1,-2,0,0x40,
+    +0,-1,+1,+0,0,0x11, +0,-1,+2,-2,0,0x40, +0,-1,+2,-1,0,0x20,
+    +0,-1,+2,+0,0,0x30, +0,-1,+2,+1,1,0x10, +0,+0,+0,+2,1,0x08,
+    +0,+0,+2,-2,1,0x40, +0,+0,+2,-1,0,0x60, +0,+0,+2,+0,1,0x20,
+    +0,+0,+2,+1,0,0x30, +0,+0,+2,+2,1,0x10, +0,+1,+1,+0,0,0x44,
+    +0,+1,+1,+2,0,0x10, +0,+1,+2,-1,1,0x40, +0,+1,+2,+0,0,0x60,
+    +0,+1,+2,+1,0,0x20, +0,+1,+2,+2,0,0x10, +1,-2,+1,+0,0,(signed char)0x80,
+    +1,-1,+1,+1,0,(signed char)0x88, +1,+0,+1,+2,0,0x08, +1,+0,+2,-1,0,0x40,
+    +1,+0,+2,+1,0,0x10
+  }, chood[] = { -1,-1, -1,0, -1,+1, 0,+1, +1,+1, +1,0, +1,-1, 0,-1 };
   ushort (*brow[5])[4], *pix;
   int prow=8, pcol=2, *ip, *code[16][16], gval[8], gmin, gmax, sum[4];
   int row, col, x, y, x1, x2, y1, y2, t, weight, grads, color, diag;
@@ -4667,11 +4660,11 @@ void CLASS vng_interpolate()
   for (row=0; row < prow; row++)		/* Precalculate for VNG */
     for (col=0; col < pcol; col++) {
       code[row][col] = ip;
-      for (cpt=&terms[0], t=0; t < 64, cpt = &terms[t]; t++) {
-	y1 = cpt->y1;  x1 = cpt->x1;
-	y2 = cpt->y2;  x2 = cpt->x2;
-	weight = cpt->weight;
-	grads = cpt->grads;
+      for (cp=terms, t=0; t < 64; t++) {
+	y1 = *cp++;  x1 = *cp++;
+	y2 = *cp++;  x2 = *cp++;
+	weight = *cp++;
+	grads = *cp++;
 	color = fcol(row+y1,col+x1);
 	if (fcol(row+y2,col+x2) != color) continue;
 	diag = (fcol(row,col+1) == color && fcol(row+1,col) == color) ? 2:1;
@@ -6692,6 +6685,8 @@ void CLASS parseSonyLensType2 (uchar a, uchar b) {
   return;
 }
 
+#define strnXcat(buf,string) strncat(buf,string,LIM(sizeof(buf)-strlen(buf)-1,0,sizeof(buf)))
+
 void CLASS parseSonyLensFeatures (uchar a, uchar b) {
 
   ushort features;
@@ -6722,41 +6717,42 @@ void CLASS parseSonyLensFeatures (uchar a, uchar b) {
     }
 
   if (features & 0x4000)
-    strncat(imgdata.lens.makernotes.LensFeatures_pre, " PZ", sizeof(imgdata.lens.makernotes.LensFeatures_pre));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_pre, " PZ");
 
   if (features & 0x0008)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " G", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " G");
   else if (features & 0x0004)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " ZA", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " ZA" );
 
   if ((features & 0x0020) && (features & 0x0040))
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Macro", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Macro");
   else if (features & 0x0020)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " STF", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " STF");
   else if (features & 0x0040)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Reflex", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Reflex");
   else if (features & 0x0080)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " Fisheye", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " Fisheye");
 
   if (features & 0x0001)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " SSM", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SSM");
   else if (features & 0x0002)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " SAM", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " SAM");
 
   if (features & 0x8000)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " OSS", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " OSS");
 
   if (features & 0x2000)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " LE", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " LE");
 
   if (features & 0x0800)
-    strncat(imgdata.lens.makernotes.LensFeatures_suf, " II", sizeof(imgdata.lens.makernotes.LensFeatures_suf));
+    strnXcat(imgdata.lens.makernotes.LensFeatures_suf, " II");
 
   if (imgdata.lens.makernotes.LensFeatures_suf[0] == ' ')
     memmove(imgdata.lens.makernotes.LensFeatures_suf, imgdata.lens.makernotes.LensFeatures_suf+1, strlen(imgdata.lens.makernotes.LensFeatures_suf));
 
   return;
 }
+#undef strnXcat
 
 void CLASS process_Sony_0x940c (uchar * buf)
 {
@@ -12969,7 +12965,22 @@ float CLASS find_green (int bps, int bite, int off0, int off1)
   return 100 * log(sum[0]/sum[1]);
 }
 
-
+#ifdef LIBRAW_LIBRARY_BUILD
+static void remove_trailing_spaces(char *string, size_t len)
+{
+  if(len<1) return; // not needed, b/c sizeof of make/model is 64
+  string[len-1]=0;
+  if(len<3) return; // also not needed
+  len = strlen(string);
+  for(int i=len-1; i>=0; i--)
+  {
+    if(isspace(string[i]))
+      string[i]=0;
+    else
+      break;
+  }
+}
+#endif
 /*
    Identify which camera created this file, and set global variables
    accordingly.
@@ -13592,7 +13603,10 @@ void CLASS identify()
       filters = 0x16161616;
     } else is_raw = 0;
   }
-
+#ifdef LIBRAW_LIBRARY_BUILD
+  // make sure strings are terminated
+  desc[511] = artist[63] = make[63] = model[63] = model2[63] = 0;
+#endif
   for (i=0; i < sizeof corp / sizeof *corp; i++)
     if (strcasestr (make, corp[i]))	/* Simplify company names */
 	    strcpy (make, corp[i]);
@@ -13602,10 +13616,15 @@ void CLASS identify()
      *cp = 0;
   if (!strncasecmp(model,"PENTAX",6))
     strcpy (make, "Pentax");
+#ifdef LIBRAW_LIBRARY_BUILD
+  remove_trailing_spaces(make,sizeof(make));
+  remove_trailing_spaces(model,sizeof(model));
+#else
   cp = make + strlen(make);		/* Remove trailing spaces */
   while (*--cp == ' ') *cp = 0;
   cp = model + strlen(model);
   while (*--cp == ' ') *cp = 0;
+#endif
   i = strlen(make);			/* Remove make from model */
   if (!strncasecmp (model, make, i) && model[i++] == ' ')
     memmove (model, model+i, 64-i);
